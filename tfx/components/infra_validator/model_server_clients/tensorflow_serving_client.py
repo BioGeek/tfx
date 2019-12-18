@@ -19,12 +19,15 @@ from __future__ import print_function
 
 from absl import logging
 import grpc
-from typing import Text
+from typing import List, Text
 
+from tensorflow_serving.apis import classification_pb2
 from tensorflow_serving.apis import get_model_status_pb2
 from tensorflow_serving.apis import model_pb2
 from tensorflow_serving.apis import model_service_pb2_grpc
 from tensorflow_serving.apis import prediction_service_pb2_grpc
+from tensorflow_serving.apis import regression_pb2
+from tfx.components.infra_validator import types
 from tfx.components.infra_validator.model_server_clients import base_client
 
 ModelState = base_client.ModelState
@@ -43,7 +46,7 @@ class TensorFlowServingClient(base_client.BaseModelServerClient):
     self._channel = grpc.insecure_channel(endpoint)
     self._model_name = model_name
     self._model_service = model_service_pb2_grpc.ModelServiceStub(self._channel)
-    self._predict_service = prediction_service_pb2_grpc.PredictionServiceStub(self._channel)  # pylint: disable=line-too-long
+    self._prediction_service = prediction_service_pb2_grpc.PredictionServiceStub(self._channel)  # pylint: disable=line-too-long
 
   def _GetModelStatus(self) -> get_model_status_pb2.GetModelStatusResponse:
     """Call GetModelStatus() from model service.
@@ -94,6 +97,21 @@ class TensorFlowServingClient(base_client.BaseModelServerClient):
       return ModelState.UNAVAILABLE
     return ModelState.NOT_READY
 
-  def IssueRequests(self, requests) -> bool:
+  def IssueRequests(self, requests: List[types.Request]) -> bool:
     """Issue requests against model server."""
-    raise NotImplementedError()
+    try:
+      for i, request in enumerate(requests):
+        if isinstance(request, classification_pb2.ClassificationRequest):
+          result = self._prediction_service.Classify(request)
+        elif isinstance(request, regression_pb2.RegressionRequest):
+          result = self._prediction_service.Regress(request)
+        else:
+          logging.error('Unsupported request type %s', type(request))
+          return False
+        logging.info('Output[%d]: %s', i, result)
+    except grpc.RpcError as e:
+      logging.error(e)
+      return False
+
+    # Every request has been succeeded without error!
+    return True
