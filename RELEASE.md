@@ -51,6 +51,7 @@
 *   Created new generic trainer executor for non estimator based model, e.g.,
     native Keras.
 *   Updated to support passing `tfma.EvalConfig` in evaluator when calling TFMA.
+*   Added an iris example with native Keras.
 
 ## Bug fixes and other changes
 *   Refactored common dependencies in the TFX dockerfile to a base image to

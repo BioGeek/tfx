@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Python source file include Iris pipeline functions and necesasry utils.
+"""Python source file include Iris pipeline functions and necessary utils.
 
-For a TFX pipeline to successfully run, a preprocessing_fn and a
-_build_estimator function needs to be provided.  This file contains both.
+The utilities in this file are used to build a model with Keras Layers, but
+uses model_to_estimator for Trainer component adaption.
 """
 
 from __future__ import absolute_import
