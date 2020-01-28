@@ -14,7 +14,7 @@
 
 ## Documentation updates
 
-# Version 0.21.0 (not yet released; still in development)
+# Version 0.21.0
 
 ## Major Features and Improvements
 
